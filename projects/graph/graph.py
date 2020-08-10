@@ -13,33 +13,88 @@ class Graph:
         """
         Add a vertex to the graph.
         """
-        pass  # TODO
+        self.vertices[vertex_id] = set()
 
     def add_edge(self, v1, v2):
         """
         Add a directed edge to the graph.
         """
-        pass  # TODO
+        if v1 in self.vertices and v2 in self.vertices:
+            self.vertices[v1].add(v2)
+        else:
+            raise IndexError("nonexistent vertex")
 
     def get_neighbors(self, vertex_id):
         """
         Get all neighbors (edges) of a vertex.
         """
-        pass  # TODO
+        return self.vertices[vertex_id]
 
     def bft(self, starting_vertex):
         """
         Print each vertex in breadth-first order
         beginning from starting_vertex.
         """
-        pass  # TODO
+        # Create an empty queue
+        q = Queue()
+
+        # Add starting vertex
+        q.enqueue(starting_vertex)
+
+        # Create set for visited vertices
+        visited = set()
+
+        # While queue is not empty
+        while q.size() > 0:
+
+            # Dequeue a vertex
+            v = q.dequeue()
+
+            # If not visited
+            if v not in visited:
+
+                # Visit it!
+                print(v)
+
+                # Mark as visited
+                visited.add(v)
+
+                # Add all neighbors to the queue
+                for neighbor in self.get_neighbors(v):
+                    q.enqueue(neighbor)
 
     def dft(self, starting_vertex):
         """
         Print each vertex in depth-first order
         beginning from starting_vertex.
         """
-        pass  # TODO
+        # Create an empty stack
+        s = Stack()
+
+        # Add starting vertex
+        s.push(starting_vertex)
+
+        # Create list for visited vertices
+        visited = set()
+
+        # While stack is not empty
+        while(s.size()):
+
+            # Pop a vertex from stack
+            v = s.pop()
+
+            # If not visited
+            if v not in visited:
+
+                # Visit it!
+                print(v)
+
+                # Mark as visited
+                visited.add(v)
+
+                # Add all neighbors to the stack
+                for neighbor in self.get_neighbors(v):
+                    s.push(neighbor)
 
     def dft_recursive(self, starting_vertex):
         """
@@ -48,7 +103,36 @@ class Graph:
 
         This should be done using recursion.
         """
-        pass  # TODO
+        # Create an empty stack
+        s = Stack()
+
+        # Add starting vertex
+        s.push(starting_vertex)
+
+        # Create list for visited vertices
+        visited = set()
+
+        # While stack is not empty
+        while(s.size()):
+
+            # Pop a vertex from stack
+            v = s.pop()
+
+            # If not visited
+            if v not in visited:
+
+                # Visit it!
+                print(v)
+
+                # Mark as visited
+                visited.add(v)
+
+                # Add all neighbors to the stack
+                for neighbor in self.get_neighbors(v):
+                    s.push(neighbor)
+
+        for neighbor in self.get_neighbors(v)
+            neighbor.dfs_recursive(v)
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -96,6 +180,7 @@ if __name__ == '__main__':
     graph.add_edge(3, 5)
     graph.add_edge(2, 3)
     graph.add_edge(4, 6)
+    # graph.add_edge(0, 6) # No 4 vertex, should raise an Exception!
 
     '''
     Should print:
