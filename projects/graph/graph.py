@@ -8,6 +8,7 @@ class Graph:
     """Represent a graph as a dictionary of vertices mapping labels to edges."""
     def __init__(self):
         self.vertices = {}
+        self.visited = set()
 
     def add_vertex(self, vertex_id):
         """
@@ -103,36 +104,17 @@ class Graph:
 
         This should be done using recursion.
         """
-        # Create an empty stack
-        s = Stack()
+        # print current vertex
+        print(starting_vertex)
 
-        # Add starting vertex
-        s.push(starting_vertex)
+        # add vertex to visited set
+        self.visited.add(starting_vertex)
 
-        # Create list for visited vertices
-        visited = set()
-
-        # While stack is not empty
-        while(s.size()):
-
-            # Pop a vertex from stack
-            v = s.pop()
-
-            # If not visited
-            if v not in visited:
-
-                # Visit it!
-                print(v)
-
-                # Mark as visited
-                visited.add(v)
-
-                # Add all neighbors to the stack
-                for neighbor in self.get_neighbors(v):
-                    s.push(neighbor)
-
-        for neighbor in self.get_neighbors(v)
-            neighbor.dfs_recursive(v)
+        # For each nonvisted neighbor, recursively call dft_recursive
+        for neighbor in self.get_neighbors(starting_vertex):
+            if neighbor not in self.visited:
+                self.dft_recursive(neighbor)
+        # return 
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -158,6 +140,12 @@ class Graph:
 
         This should be done using recursion.
         """
+        # l = []
+        # l.append(starting_vertex)
+
+        # for neighbor in self.get_neighbors(starting_vertex):
+        #     neighbor.dfs_recursive(neighbor, destination_vertex)
+        # return l
         pass  # TODO
 
 if __name__ == '__main__':
@@ -213,7 +201,11 @@ if __name__ == '__main__':
         1, 2, 4, 6, 3, 5, 7
     '''
     graph.dft(1)
+    print()
+    print()
     graph.dft_recursive(1)
+
+    print(graph.visited)
 
     '''
     Valid BFS path:
