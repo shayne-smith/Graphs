@@ -33,7 +33,6 @@ def earliest_ancestor(ancestors, starting_vertex):
         add_vertex(vertices, a[0])
         add_vertex(vertices, a[1])
         add_edge(vertices, a[1], a[0])
-        print(vertices)
     # {1: {10}, 3: {1, 2}, 2: set(), 6: {3, 5}, 5: {4}, 7: {5}, 4: set(), 8: {11, 4}, 9: {8}, 11: set(), 10: set()}
 
     # Create an empty stack to store all the different paths
@@ -54,12 +53,19 @@ def earliest_ancestor(ancestors, starting_vertex):
         # Remove the last PATH from stack
         p = s.pop()
 
+        # Grab the last vertex from the PATH
+        last = p[-1]
+
+        # longest_path = [9, 8, 4] and p = [9, 8, 11]
+        # last = 11 and longest_path[-1] = 4
+        if len(longest_path) == len(p):
+            if last < longest_path[-1]:
+                print(p)
+                longest_path = p
+
         if len(longest_path) < len(p):
             print(p)
             longest_path = p
-
-        # Grab the last vertex from the PATH
-        last = p[-1]
 
         # If that vertex has not been visited...
         if last not in visited:
@@ -77,7 +83,7 @@ def earliest_ancestor(ancestors, starting_vertex):
 
                 s.push(path)
     
-    if len(longest_path) == 0:
+    if len(longest_path) == 1:
         return -1
     else:
         return longest_path[-1]
@@ -87,3 +93,4 @@ test_ancestors = [(1, 3), (2, 3), (3, 6), (5, 6), (5, 7), (4, 5), (4, 8), (8, 9)
 
 print(earliest_ancestor(test_ancestors, 1)) # 10
 print(earliest_ancestor(test_ancestors, 6)) # 10
+print(earliest_ancestor(test_ancestors, 2)) # -1
