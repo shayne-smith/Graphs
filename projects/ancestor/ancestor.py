@@ -23,9 +23,10 @@ def get_neighbors(vertices, vertex_id):
     """
     return vertices[vertex_id]
     
-# test_ancestors = [(1, 3), (2, 3), (3, 6), (5, 6), (5, 7), (4, 5), (4, 8), (8, 9), (11, 8), (10, 1)]
 def earliest_ancestor(ancestors, starting_vertex):
-    """Represent a graph as a dictionary of vertices mapping labels to edges."""
+    """Find the earliest ancestor for a given person"""
+
+    # Represent a graph as a dictionary of vertices mapping labels to edges
     vertices = {}
 
     # Build graph
@@ -33,7 +34,6 @@ def earliest_ancestor(ancestors, starting_vertex):
         add_vertex(vertices, a[0])
         add_vertex(vertices, a[1])
         add_edge(vertices, a[1], a[0])
-    # {1: {10}, 3: {1, 2}, 2: set(), 6: {3, 5}, 5: {4}, 7: {5}, 4: set(), 8: {11, 4}, 9: {8}, 11: set(), 10: set()}
 
     # Create an empty stack to store all the different paths
     s = Stack()
@@ -42,29 +42,27 @@ def earliest_ancestor(ancestors, starting_vertex):
     path = [starting_vertex]
     s.push(path)
 
-    # Create a Set to store visited vertices
+    # Create a set to store visited vertices
     visited = set()
 
+    # Create a list to store the path to earliest ancestor
     longest_path = []
 
     # While the stack is not empty...
     while s.size() > 0:
 
-        # Remove the last PATH from stack
+        # Remove the last path from stack
         p = s.pop()
 
-        # Grab the last vertex from the PATH
+        # Grab the last vertex from the path
         last = p[-1]
 
-        # longest_path = [9, 8, 4] and p = [9, 8, 11]
-        # last = 11 and longest_path[-1] = 4
-        if len(longest_path) == len(p):
-            if last < longest_path[-1]:
-                print(p)
-                longest_path = p
+        # If two ancestors are from same generation, set longest_path to ancestor with smaller value
+        if len(longest_path) == len(p) and last < longest_path[-1]:
+            longest_path = p
 
+        # Find longest path
         if len(longest_path) < len(p):
-            print(p)
             longest_path = p
 
         # If that vertex has not been visited...
@@ -75,16 +73,20 @@ def earliest_ancestor(ancestors, starting_vertex):
 
             # Then add A PATH TO its neighbors to the top of the stack
             for neighbor in get_neighbors(vertices, last):
-                # SHALLOW COPY THE PATH
+                # Shallow copy the path
                 path = copy.copy(p)
 
-                # APPEND THE NEIGHOR TO THE BACK
+                # Append the neighbor to the back
                 path.append(neighbor)
-
+                
+                # Add updated path to stack
                 s.push(path)
     
+    # return -1 if no ancestors were found
     if len(longest_path) == 1:
         return -1
+
+    # otherwise, return the earliest ancestor
     else:
         return longest_path[-1]
 
