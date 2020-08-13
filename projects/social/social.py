@@ -1,4 +1,5 @@
 import random
+import copy
 
 class Queue():
     def __init__(self):
@@ -79,11 +80,43 @@ class SocialGraph:
             friendships = possible_friendships[i]
             self.add_friendship(friendships[0], friendships[1])
 
-    def get_neighbors(user_id):
+    def get_neighbors(self, user_id):
         """
         Get all friends (edges) of a user.
         """
         return self.friendships[user_id]
+
+    def bft(self, user_id):
+        """
+        Return a set of user's extended friends in breadth-first order
+        beginning at user_id.
+        """
+        # Create an empty queue
+        q = Queue()
+
+        # Add starting vertex
+        q.enqueue(user_id)
+
+        # Create set for visited vertices
+        visited = set()
+
+        # While queue is not empty
+        while q.size() > 0:
+
+            # Dequeue a vertex
+            friend = q.dequeue()
+
+            # If not visited
+            if friend not in visited:
+
+                # Mark as visited
+                visited.add(friend)
+
+                # Add all neighbors to the queue
+                for neighbor in self.get_neighbors(friend):
+                    q.enqueue(neighbor)
+
+        return visited
 
     def bfs(self, starting_vertex, destination_vertex):
         """
@@ -142,53 +175,24 @@ class SocialGraph:
         """
 
         # store friend network
-        # user 1 friends --- 1: {2, 5, 7}
-        # connections = sg.get_all_social_paths(1)
-        # friends_network = {
-        #   1: [1],
-        #   2: [1, 2],
-        #   5: [1, 5],
-        #   7: [1, 7],
-        #   4: [1, 5, 4],
-        #   6: [1, 7, 6],
-        #   8: [1, 5, 4, 8],
-        #   9: [1, 7, 6, 9]
-        # }
-        #
-
         friend_network = {}
 
-        # store friends in queue for bfs
-        q = Queue()
+        # find all extended friends
+        extended_friends = self.bft(user_id)
 
-        # enqueue A PATH TO the starting vertex ID
-        path = [user_id]
-        q.enqueue(path)
+        print(len(extended_friends))
 
-        # Create a Set to store visited vertices
-        visited = set()
-
-        # While the queue is not empty...
-        while q.size() > 0:
-
-            # Dequeue the first PATH
-            p = q.dequeue()
-
-            # Grab the last vertex from the PATH
-            last = p[-1]
-
-            # If that vertex has not been visited...
-            if last not in visited:
-
-                # Mark it as visited...
-                visited.add(last)
+        # find shortest path to friend from user and add that path to friend_network
+        for friend in extended_friends:
+            shortest_path = self.bfs(user_id, friend)
+            friend_network[friend] = shortest_path
 
         return friend_network
 
 
 if __name__ == '__main__':
     sg = SocialGraph()
-    sg.populate_graph(10, 2)
-    print(sg.friendships)
-    connections = sg.get_all_social_paths(1)
+    sg.populate_graph(1000, 5)
+    # print(sg.friendships)
+    connections = sg.get_all_social_paths(34)
     print(connections)
