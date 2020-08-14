@@ -3,18 +3,19 @@ from player import Player
 from world import World
 
 import random
+import copy
 from ast import literal_eval
+from util import Queue
 
 # Load world
 world = World()
 
-
 # You may uncomment the smaller graphs for development and testing purposes.
 # map_file = "maps/test_line.txt"
-map_file = "maps/test_cross.txt"
+# map_file = "maps/test_cross.txt"
 # map_file = "maps/test_loop.txt"
 # map_file = "maps/test_loop_fork.txt"
-# map_file = "maps/main_maze.txt"
+map_file = "maps/main_maze.txt"
 
 # Loads the map into a dictionary
 room_graph=literal_eval(open(map_file, "r").read())
@@ -22,27 +23,35 @@ world.load_graph(room_graph)
 
 # Print an ASCII map
 world.print_rooms()
-
 player = Player(world.starting_room)
 
-# Fill this out with directions to walk
-# traversal_path = ['n', 'n']
-traversal_path = []
+# find the opposite direction
+def find_opposite_direction(direction):
+    if direction == "n":
+        return "s"
+    elif direction == "s":
+        return "n"
+    elif direction == "e":
+        return "w"
+    elif direction == "w":
+        return "e"
+    else:
+        print("INVALID DIRECTION")
+        return False
 
-traversal_graph = {}
+# find shortest path to a room with unexplored exits
+def bfs(starting_vertex):
+    """
+    Return a list of room id's containing the shortest path from
+    starting_vertex to a room with unexplored exits in
+    breath-first order.
+    """
 
-def bfs(self, starting_vertex):
-    """
-    Return a list containing the shortest path from
-    starting_vertex to vertex with unexplored rooms adjacent to it in
-    breadth-first order.
-    """
     # Create an empty queue 
     q = Queue()
     
-    # enqueue A PATH TO the starting vertex ID
-    path = [starting_vertex]
-    q.enqueue(path)
+    # enqueue a path to the starting vertex
+    q.enqueue([starting_vertex])
 
     # Create a Set to store visited vertices
     visited = set()
@@ -53,77 +62,128 @@ def bfs(self, starting_vertex):
         # Dequeue the first PATH
         p = q.dequeue()
 
-        # Grab the last_room vertex from the PATH
-        last_room = p[-1]
+        # Grab the last vertex from the path
+        last = p[-1]
 
         # If that vertex has not been visited...
-        if last_room not in visited:
+        if last.id not in visited:
             
-            # CHECK IF IT'S THE TARGET
-            # IF SO, RETURN PATH
-            if last_room == destination_vertex:
+            # check if current room has unexplored exits
+            if '?' in traversal_graph[last.id].values():
+
+                # return list of rooms if the room has unexplored exits
                 return p
 
-            # Mark it as visited...
-            visited.add(last_room)
+            # Mark current room as visited...
+            visited.add(last.id)
 
-            # Then add A PATH TO its neighbors to the back of the queue
-            for neighbor in self.get_neighbors(last_room):
-                # SHALLOW COPY THE PATH
-                path = copy.copy(p)
+            # Then add a path to its neighbors to the back of the queue
+            for next_direction in last.get_exits():
+                # shallow copy that path
+                new_path = copy.copy(p)
 
-                # APPEND THE NEIGHOR TO THE BACK
-                path.append(neighbor)
+                # append the neighbor to the end of new_path
+                new_path.append(last.get_room_in_direction(next_direction))
 
-                q.enqueue(path)
+                # add new_path to queue
+                q.enqueue(new_path)
 
-def find_traversal_path(traversal_path):
+    return False
 
-    while len(traversal_graph) != len(room_graph):
+# map out the maze
+def draw_traversal_graph(v, direction=None, new_room=None):
 
-        # find current room and its exits
-        current_room = player.current_room.id
-        current_room_exits = player.current_room.get_exits()
+    # check if current room is already in traversal_graph
+    if v.id not in traversal_graph:
 
-        # if not already in traversal graph, record having visited current room and create exit dictionary for it
-        if traversal_graph.get(current_room) is None:
-            traversal_graph[current_room] = {}
+        # create empty dictionary for current room
+        traversal_graph[v.id] = {}
 
-            # fill exit dictionary with possible exits for current room
-            for exit in current_room_exits:
-                traversal_graph[current_room][exit] = '?'
+        # initialize all exits with a '?' value
+        for exit in v.get_exits():
+            traversal_graph[v.id][exit] = '?'
 
-        next_direction = 'p'
+    # check if there is a direction and new_room pass into function
+    if direction is not None and new_room is not None:
 
-        while len(current_room_exits) != 1 and :
+        # check if new_room is already in traversal_graph
+        if new_room.id not in traversal_graph:
+
+            # create empty dictionary for new_room
+            traversal_graph[new_room.id] = {}
+
+            # initialize all exits with a '?' value
+            for exit in new_room.get_exits():
+                traversal_graph[new_room.id][exit] = '?'
+
+        # connect the current and new rooms with correct directions
+        traversal_graph[v.id][direction] = new_room.id
+        traversal_graph[new_room.id][find_opposite_direction(direction)] = v.id
+
+# pick a random, unexplored exit
+def random_step(v):
+
+    # check for unexplored exits
+    if '?' in traversal_graph[v.id].values():
+        for exit in v.get_exits():
             
+            # choose only unexplored exits
+            if traversal_graph[v.id][exit] == '?':
 
+                # find next room over
+                new_room = v.get_room_in_direction(exit)
 
-        # find a random new direction to go into
-        next_direction = player.current_room.get_exits()[random.randint(0, len(player.current_room.get_exits()) - 1)]
-        print(next_direction)
+                # add new room to visited rooms
+                player_visited_rooms.add(new_room)
 
-        # move player into next room
-        player.travel(next_direction)
+                # draw traversal graph with current room, exit direction, and next room
+                draw_traversal_graph(v, exit, new_room)
 
-        current_room_exits = player.current_room.get_exits()
-        print(current_room_exits)
+                # add exit direction to traversal path
+                traversal_path.append(exit)
+
+                return new_room
     
-    print(traversal_graph)
+##### Main #####
+traversal_path = []
+player_visited_rooms = set()
+traversal_graph = {}
+current_room = world.starting_room
 
+draw_traversal_graph(world.starting_room)
+player_visited_rooms.add(world.starting_room)
 
+# run simulation until player has visited all rooms
+while len(player_visited_rooms) < len(room_graph):
 
+    # check if current room has unexplored exits
+    if '?' in traversal_graph[current_room.id].values():
 
+        # take a random step into an unexplored room
+        current_room = random_step(current_room)
 
+    # otherwise, find a path back to a room with unexplored exits
+    else:
 
-    # 1. pick an unexplored direction from current room
-    # 2. travel in that direction and log move
-    # 3. loop through this until you reach a room with no unexplored paths
-    # 4. use bfs to find shortest path back to an unexplored room
-    # 5. convert path returned from bfs to a list of n/s/e/w directions
-    # 6. add that converted path of directions to traversal path
-    
-find_traversal_path(traversal_path)
+        # run bfs to find shortest path back to room with unexplored exits
+        backtracking_path = bfs(current_room)
+
+        # loop through each room in backtracking_path
+        for path in backtracking_path:
+
+            # check all exits in current room
+            for exit in current_room.get_exits():
+
+                # check if the value of current room's exit direction matches next room in backtracking_path
+                if traversal_graph[current_room.id][exit] == path.id:
+
+                    # add exit direction to traversal_path
+                    traversal_path.append(exit)
+
+                    # update current room to next room in backtracking_path
+                    current_room = current_room.get_room_in_direction(exit)
+
+                    break
 
 
 # TRAVERSAL TEST
