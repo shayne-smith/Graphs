@@ -48,7 +48,11 @@ Note that in this sample, Users 3, 4 and 9 are not in User 1's extended social n
 
 1. To create 100 users with an average of 10 friends each, how many times would you need to call `add_friendship()`? Why?
 
+A. 500 because friendships can be represented as an undirected graph, which means every friendship is like a two-way street, where there is only 1 friendship for 2 people. Because of that, we can divide the numbers of times add_friendship() is called by 2.
+
 2. If you create 1000 users with an average of 5 random friends each, what percentage of other users will be in a particular user's extended social network? What is the average degree of separation between a user and those in his/her extended network?
+
+A. (994/1000)% / 6
 
 
 
