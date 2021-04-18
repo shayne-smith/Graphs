@@ -13,6 +13,9 @@ class Queue():
     def size(self):
         return len(self.queue)
 
+    def __str__(self):
+        return f"{self.queue}"
+
 class Stack():
     def __init__(self):
         self.stack = []
